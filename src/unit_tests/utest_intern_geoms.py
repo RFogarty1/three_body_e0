@@ -66,6 +66,44 @@ class testCartFromSankeyForm(unittest.TestCase):
 			[self.assertAlmostEqual(exp,act,places=3) for exp,act in it.zip_longest(posA,posB)]
 		
 
+
+
+class testThreeLengthsFormat(unittest.TestCase):
+
+	def setUp(self):
+		self.lengthsA = [4, 4.2426406871, 3.1622776602] #rij, rjk, rik
+		self.expCartGeomA = [ [0.0,0.0,0.0],
+		                      [0.0,0.0,4.0],
+		                      [0.0,3.0,1.0] ]
+
+		self.lengthsLinear = [4.0, 7.0, 3.0]
+		self.expCartGeomLinear = [ [0.0, 0.0, 0.0],
+		                           [0.0, 0.0, 4.0],
+		                           [0.0, 0.0,-3.0] ]
+
+
+	def testSimpleTriangle(self):
+		testObj = tCode.TrimerInternGeom.fromBondLengths(*self.lengthsA)
+		actualGeom = testObj.cartCoords
+
+		for posA,posB in it.zip_longest(self.expCartGeomA,actualGeom):
+			[self.assertAlmostEqual(exp,act) for exp,act in it.zip_longest(posA,posB)]
+
+
+	def testZeroDegreesCase(self):
+		testObj = tCode.TrimerInternGeom.fromBondLengths(*self.lengthsLinear)
+		actualGeom = testObj.cartCoords
+
+		for posA,posB in it.zip_longest(self.expCartGeomLinear,actualGeom):
+			[self.assertAlmostEqual(exp,act) for exp,act in it.zip_longest(posA,posB)]
+
+
+	def testImpossibleTriangle(self):
+		testLengths = [2,3,10]
+		with self.assertRaises(ValueError):
+			testObj = tCode.TrimerInternGeom.fromBondLengths(*testLengths)
+
+
 class testGeometryRepOutPuts(unittest.TestCase):
 
 	def setUp(self):

@@ -48,6 +48,39 @@ class TrimerInternGeom():
 
 		return TrimerInternGeom([atomAPos,atomBPos,atomCPos])
 
+
+	@classmethod
+	def fromBondLengths(self, dAB, dBC, dCA):
+		floatTol = 1e-6 #for catching errors in cos-1(theta)
+		atomAPos = [0,0,0]
+		atomBPos = [0,0,dAB]
+
+		#Get all angles to make sure these lengths can form a triangle
+		getCosFactorAB = lambda sideA,sideB,sideC: ( (sideA**2) + (sideB**2) - (sideC**2) ) / (2*sideA*sideB)
+		allCosFactors = list()
+		allCosFactors.append( getCosFactorAB(dAB, dBC, dCA) ) #This is the one i actually want to use
+		allCosFactors.append( getCosFactorAB(dBC, dCA, dAB) )
+		allCosFactors.append( getCosFactorAB(dCA, dAB, dBC) )
+
+		for factor in allCosFactors:
+			try:
+				currAngle = math.acos(factor)
+			except ValueError as e:
+				if abs(factor - 1.0) < floatTol: #1.0000x domain error
+					currAngle = math.acos(1.0)
+				elif abs(factor + 1.0) < floatTol: #-1.0000x domain error
+					currAngle = math.acos(-1.0)
+				else:
+					raise ValueError("Lengths of {},{},{} do not lead to a triangle".format(dAB,dBC,dCA)) from e
+
+		#Now use the first angle and dCA to get the final position
+		cosFactorABC = allCosFactors[0]	
+		zComp = (-1*dBC*cosFactorABC) + dAB #Used the fact that dAB equals -1*the z-component of rBA vector
+		yComp = math.sqrt( (dCA**2) - (zComp**2) )
+		atomCPos = [0, yComp, zComp]
+
+		return TrimerInternGeom( [atomAPos, atomBPos, atomCPos] )
+
 	@property
 	def sankeyRep(self):
 		bondCentPos = [(x-y)/2 for x,y in it.zip_longest(self.cartCoords[1],self.cartCoords[0])]
