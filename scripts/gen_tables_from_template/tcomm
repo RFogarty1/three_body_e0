@@ -1,0 +1,1 @@
+./gen_e0_tables_from_template_file.py test/Si.in Si --nCores 6 --startFolder test/work_folder --geomSteps 2.0 2.0 2.0 --nocalcs

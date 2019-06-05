@@ -1,0 +1,792 @@
+################################################################################
+# This is the input file for tb1.
+#
+# All flags have the format:
+#
+# Field_Name
+# Data
+#
+# NOTE:
+# 1) The program is case insensitive.
+# 2) The fields can appear in any order.
+# 3) Only relevant fields will be read in.
+# 4) All lengths are in Bohr radii, and all energies are in Rydbergs.
+################################################################################
+
+################################################################################
+# ------- Parameters defining the electronic states to be used -------
+#
+# DataSet is the name of the subdirectory of the main directory in which the 
+# data files are kept for the chosen model.
+#
+# SpinFlag determines whether the calculation is to be spin polarized or not.
+#  0  ==>  Not spin polarized
+#  1  ==>  Collinear Spin
+#  2  ==>  Non-collinear spin
+# If SpinFlag = 1, then a list of the initial net spin on each atom is required.
+# The spin of an electron is (of course) 0.5. If you have a list of identical
+# spin values, you can compress the list by writing (for example)
+#   0.5 * 15
+# This will give 15 identical spins. NOTE: you need the spaces on either side
+# of the *
+# If SpinFlag = 2, then a list of the initial net spin vectors on each atom is
+# required (x, y and z components).
+#
+# OccupyFlag determines how the occupancies of the single particle states are
+# assigned.
+#  0  ==>  Use default occupancies (does not apply to metals)
+#  1  ==>  Find occupancies using Fermi distribution with
+#          temperature given by ElectronTemperature
+#  2  ==>  User assigned occupancy. Followed by a list of the form
+#          Number of elements in list
+#          Occupancy #1   Number of levels with this occupancy
+#          Occupancy #2   Number of levels with this occupancy
+#          Occupancy #3   Number of levels with this occupancy
+#          ...............
+#  3  ==>  Find occupancies using Paxton-Methfessel scheme with
+#          broadening given by ElectronTemperature. Following number is the
+#          order of the polynomial used.
+#  4  ==>  Find occupancies using Fermi distribution with
+#          temperature given by ElectronTemperature and a fixed
+#          total spin.  Only valid for SpinFlag = 1. Following number is the
+#          the total spin.
+#
+# OccupyTolerance sets the tolerance on the number of electrons used when
+# searching for the Fermi energy
+#
+# ElectronTemperature is the temperature (in Ry) that the electrons are given
+# to smooth the finding of the Fermi level.
+#
+# BlochStates is the flag marking the list of quantities to define the k points
+# to be used for a periodic calculation. Zero K points means Bloch states are
+# not to be used. A positive number means that you must provide a list with
+# this many K points (in reduced coordinates) with their weights (k1,k2,k3,wt)
+# A value of -1 means that a Monkhorst-Pack mesh will be generated for you. You
+# must provide three integers giving the number of points in each direction.
+#
+# ElectronExcess is the number of extra electrons to be added to the system over
+# and above those contributed by the neutral atoms.
+#
+# excMbCorr
+# 0 fract(tb1 only) ==> Do not apply a correction for many-body effects to E0
+# 1 fract(tb1 only) ==> Apply a correction to E0 based on the uniform density
+#                       approximation. This is multiplied by fract (e.g. usually
+#                       set fract as 1.0) before being added to E0. For DFT2
+#                       only the flag is currently read (fract=1.0 always)
+# 2 fract(tb1 only) ==> In tb1 this says not to subtract the 2-body terms off
+#                       (not really recommeneded ever). Invalid option in dft2
+# 3 (dft2 only)     ==> Applies correction of 1 (which is the zeroth order term
+#                       in a Taylor expansion) PLUS the second-order term in the
+#                       relevant Taylor expansion.
+################################################################################
+DataSet
+Test/format_4
+
+SpinFlag
+0
+0.0 0.0
+
+OccupyFlag
+1 0
+
+OccupyTolerance
+1.0e-12
+
+ElectronTemperature
+0.001
+
+BlochStates
+0
+2 2 2
+
+ElectronExcess
+0.0
+
+################################################################################
+# ------- Parameters defining the form for electron correlation -------
+#
+# LSDApUFlag determines if the correlation correction (U-J) is to be used.
+#  0  ==>  Ordinary TB
+#  1  ==>  TB plus U
+#
+# CrystalFieldXCWeight determines what fraction of the exchange and correlation
+# is kept for the crystal field terms.
+#
+# VxcMBCorrXtal determines whether or not many body corrections are applied to
+# the crystal field terms. The first number is the flag, and the second is the
+# weight attached to the correction terms. The flags are:
+#  0  ==>  No corrections
+#  1  ==>  Use density overlap.
+#  2  ==>  Use density overlap. No two body subtraction.
+#  3  ==>  Use Sankey expression.
+#  4  ==>  Use Sankey expression. No two body subtraction.
+#
+# VanDerWaals determines if van der Waals interactions are included. Note that
+# parameters need to be added to the tight binding model in a .vdw file.
+#  0  ==>  Do not use van der Waals interactions
+#  1  ==>  Use van der Waals interactions
+###############################################################################
+LSDApUFlag
+0
+
+CrystalFieldXCWeight
+1.0
+
+VxcMBCorrXtal
+0 1.0
+
+VanDerWaals
+0
+
+################################################################################
+# ------- Parameters defining external fields -------
+#
+# MagneticField gives the magnitude of the uniform magnetic field along the z
+# direction. Its value is \mu_B B in units of Rydberg.
+#
+# ExternalField defines the form of an applied electrostatic potential. It has
+# two parts: the spatial form and the time dependence. First the number of fields
+# is required, then a line for each the spatial form and time dependence follows.
+#
+#  N  ==>  Number of fields.
+# Spatial form:
+#  0  ==>  Shift in onsite energy.
+#          Followed by: atom index (1 to N) and shift amount (in Ry)
+#  1  ==>  Sawtooth field (corresponding to uniform electric field)
+#          Followed by direction (1=x, 2=y, 3=z) and field strength (in Ry/bohr)
+# Time dependence:
+#  0  ==>  Static
+#  1  ==>  Pulse
+#          Followed by: duration (fs)
+#  2  ==>  Periodic
+#          Followed by: period (fs)
+#  3  ==>  Sin^2 Envelope Pulse
+#          Followed by: duration (fs)
+#                       laser frequency (1/fs)
+#                       phase
+#                       pulse start (fs)
+###############################################################################
+MagneticField
+0.0
+
+ExternalField
+0
+0
+
+################################################################################
+# ------- Parameters defining the method of self-consistency -------
+#
+# SCFFlag determines whether self-consistency is to be used or not
+#  0  ==>  No self-consistency included
+#  1  ==>  Monopole self-consistent calculation
+#  2  ==>  Monopole and dipole self-consistent calculation
+#  3  ==>  Monopole, dipole and quadrupole self-consistent calculation
+#
+# NLoops is the number of loops used to achieve self-consistency
+#
+# ETol is the maximum change in the total energy between self-consistency
+# iterations for a self-consistent solution to have been achieved
+#
+# ResidueTol is the largest allowed rms change in the density as a percentage of
+# the average density for a self-consistent solution to have been achieved
+#
+# MixScheme determines the scheme used to mix charge densities
+#  0  ==>  Linear mixing (slow)
+#  1  ==>  Pulay (fast - default)
+#
+# MixLevels is the number of previous input charge densities used to estimate
+# the optimal new input charge density.
+#
+# MixFactor gives the fraction of the new density mixed with the old when
+# simple mixing is used
+#
+# SpinMixFactor gives the fraction of the new spin polarization mixed with the
+# old
+#
+# PreconditoningFlag determines what type of preconditioning of the charge is
+# used before updating it.
+#  0  ==>  No preconditioning
+#  1  ==>  Independent atom preconditioner (second value is dn/de)
+#
+# MixClipping is the maximum change in charge and magnetic moment allowed
+# during one mixing step. First number is for charge, and second for magnetic
+# moment. This applies only to orthogonal tight binding
+################################################################################
+SCFFlag
+0
+
+NLoops
+30
+
+ETol
+0.0
+
+ResidueTol
+0.001
+
+MixScheme
+1
+
+MixLevels
+5
+
+MixFactor
+0.2
+
+SpinMixFactor
+0.2
+
+PreconditioningFlag
+1 1.0
+
+MixClipping
+0.01 0.1
+
+################################################################################
+# ------- Open boundary calculations -------
+#
+# OpenBoundaryTerminals determines how many terminals are considered for 
+# open boundaries with current-carrying states. Note that the atoms to which
+# terminals are attached can be pinned (see <Pin> below).
+#  0 ==> No terminals, and hence no current-carrying states
+#  N ==> N terminals, and hence current-carrying states with open boundaries
+#  <Number of terminals> <Chemical potential flag> <Lower cutoff energy> <Reference chemical potential>
+#  <Bias> <Gamma> <kT> <Pin> <No of probes> <atom 1> <atom 2> ...
+#  <Bias> <Gamma> <kT> <Pin> <No of probes> <atom 1> <atom 2> ...
+#  ...
+#
+# The chemical potential flag takes the following values
+# 0 ==> fixed chemical potentials
+# 1 ==> reference chemical potential adjusted to fix the number of electrons in the system
+# The <Pin> flag determines if these atoms or pinned or not.
+# 0 ==> do not pin
+# 1 ==> pin
+#
+# Note that if Gamma is set to zero for all the terminals, then a simplified
+# expression can be used that is the correct limit of the general expression.
+# This is appropriate for electrochemical simulations in which there is no
+# direct electron current between the electrodes (the current is carried by ions).
+#
+# If the number of probes is set to -1, then all the atoms not already assigned to
+# a terminal are assigned to this terminal.
+# 
+# OpenBoundaryCurrent provides the lists of atoms that form the interfaces
+# between pairs of regions (A and B) between which measured currents flow.
+# Number of currents
+# <Number of atoms in A> <atom A1> <atom A2> ...
+# <Number of atoms in B> <atom B1> <atom B2> ...
+# <Number of atoms in A> <atom A1> <atom A2> ...
+# <Number of atoms in B> <atom B1> <atom B2> ...
+# ...
+#
+# OpenBoundaryTransmission causes the tramsmission function between pairs of
+# terminals to be written to file at the end of the simulation.
+# Flag (0 ==> no output, 1 ==> produce output)
+# <Emin> <Emax> <dE>
+#
+# NBands the number of bands you want to include.
+################################################################################
+OpenBoundaryTerminals
+0 1 -10.0 0.0
+0.0 0.01 0.001 1 2 1  2  
+
+OpenBoundaryCurrent
+0
+3 1 2 3
+3 4 5 6
+
+OpenBoundaryTransmission
+0
+-10.0 10.0 0.01
+
+NBands
+4
+
+################################################################################
+# ------- Parameters defining the characteristics of the job -------
+#
+# Job is the job control flag:
+#  0  ==>  Debug mode
+#  1  ==>  Single point energy calculation
+#  2  ==>  Static relaxation
+#  3  ==>  Molecular dynamics
+#  4  ==>  Defined motion of one atom (all others held fixed)
+#  5  ==>  Ehrenfest Dynamics
+#  99 ==>  User defined operation
+#          (You will need to write a subroutine called douser.c)
+#
+# RestartFlag determines whether the atomic coordinates and velocities are to be
+# read in from a restart file.
+#  0  ==>  Do not use restart file
+#  1  ==>  Use restart file for atomic coordinates and velocities
+#  2  ==>  Use atomic coordinates from restart file, but initialize
+#          velocities
+#  3  ==>  As for 1, but set initial MD step to 0
+#  4  ==>  As for 2, but set initial MD step to 0
+#
+# MaximumTime determines how long the job is allowed to run for in hours.
+#
+# NoNetForceFlag > 0 results in the net force on the cell being set to zero. 
+# Do not use this with constraints. It is only useful for molecules.
+################################################################################
+Job
+1
+
+RestartFlag
+0
+
+MaximumTime
+1000000.0
+
+NoNetForceFlag
+1
+
+################################################################################
+# ------- Parameters defining the geometry -------
+#
+# CellVec is the direction vectors for the unit cell.
+#
+# CellSize is the length of the cell vectors in bohr radii.
+#
+# CellRepeat determines the cell boundary conditions along the three directions
+# of CellVec.
+#  0  ==>  Free boundary
+#  1  ==>  Periodic boundary
+#
+# NAtom is the number of atoms in the unit cell.
+#
+# Format determines the input format for atomic coordinates.
+#  0  ==>  Reduced coordinate format in units of the translation vectors
+#  1  ==>  z-matrix format
+#  2  ==>  (x,y,z) format in units of the lattice constant
+#  3  ==>  (x,y,z) format in angstroms, with atomic symbol first
+#  4  ==>  Read coordinates in format 3 from file specified under
+#          Atoms section, followed by a single number (see 3).  File contains 
+#          number of atoms on its first line. NAtom in this file is ignored.
+#
+# Atoms is the list of atomic positions. Below is given the z-matrix input.
+#
+# Isotope gives a list of isotope mass shifts (units of proton mass) and
+# nuclear spin data for the atoms in the unit cell. The format is:
+# Number of atoms whose isotope is to be changed
+# Atom number   Mass shift   Nuclear spin   Nuclear magnetic moment
+# Atom number   Mass shift   Nuclear spin   Nuclear magnetic moment
+# Atom number   Mass shift   Nuclear spin   Nuclear magnetic moment
+# .....
+#
+# PBCFlag determines if the atoms are to moved back into the unit cell should
+# they wander out.
+#  0  ==>  Do not fold atoms back in
+#  1  ==>  Do fold atoms back in
+#
+# NeighbourListFlag determines how the neighbour list is formed.
+#  0  ==>  Always use the slower but safer method
+#  1  ==>  Use the linear scaling method when possible
+################################################################################
+CellVec
+1.0 1.0 0.0
+1.0 0.0 1.0
+0.0 1.0 1.0
+
+CellSize
+7.257 7.257 7.257 
+
+CellRepeat
+1 1 1
+
+NAtom
+2
+
+Format
+0
+
+Atoms
+  .0000000        .0000000         .00000000  Si 
+  .2500000        .2500000         .25000000  Si 
+
+Isotope
+0
+1 +1.0
+
+PBCFlag
+1
+
+NeighbourListFlag
+0
+
+################################################################################
+# ------- Parameters for relaxation simulations -------
+#
+# RFlag is the relaxation method flag.
+#  1  ==>  Steepest descent
+#  2  ==>  Conjugate gradient
+#  3  ==>  Variable metric
+#  4  ==>  Find transition state using mode following
+#  5  ==>  Relax cell and atomic coordinates
+#  6  ==>  BFGS
+# Making RFlag negative means numeric rather than analytic forces are used.    
+#
+# CellRelaxMode defines the way the cell vectors are relaxed:
+#  0  ==>  Free relaxation. Note that this requires the cell vectors to be
+#          entered in a standard manner:
+#          a1 = ( a,  0,  0)
+#          a2 = (bx, by,  0)
+#          a3 = (cx, cy, cz)
+#  1  ==>  Volume relaxed at fixed shape
+#  2  ==>  Relax along axis 1 only
+#  3  ==>  Relax along axis 2 only
+#  4  ==>  Relax along axis 3 only
+#
+# FTol is the highest force allowed in a relaxed structure. Units are
+# rydbergs/bohr radius.
+#
+# MaxDisplacement is the maximum distance any atom can move in any one update.
+# Currently only used by variable metric minimization.
+#
+# StressTol is the highest trace of the stress allowed in a relaxed structure.
+# Units are MBars.
+#
+# Pinned determines which atoms are pinned. Variables are:
+# Number of pinned atoms and the index for each pinned atom.
+#
+# Constrain determines constraints to be applied to atomic motion. Variables
+# are:
+# Number of constrained atoms 
+# The index of atom and normal to plane of constraint
+#
+# ReactionCoordinate defines the constraint direction for a drag calculation of
+# a minimum energy pathway. Variables are:
+# Type
+# Coordinates of atoms
+#
+# MaxNSteps: see molecular dynamics section
+################################################################################
+RFlag
+3
+
+CellRelaxMode
+0
+
+FTol
+0.0001
+
+MaxDisplacement
+0.1
+
+StressTol
+0.001
+
+Pinned
+0
+1
+
+Constrain
+0
+1 1.0 1.0 0.0
+
+ReactionCoordinate
+0
+
+################################################################################
+# ------- Parameters for molecular dynamics simulations -------
+#
+# AtomTemperature is the temperature of the atoms in kelvin.
+#
+# TemperatureTolerance is the fractional error in the temperature allowed
+# before temperature rescaling. A negative value means constant energy MD is to
+# be used.
+#
+# NoseHoover is set if a Nose-Hoover thermostat is to be used. The value given
+# is the relaxation time in femto seconds. A negative value turns this
+# thermostat off.
+# NOTE: This works alongside temperature rescaling. To use only this thermostat,
+# set TemperatureTolerance to a negative value.
+#
+# KickAtom allows for stochastic events that give atoms sudden increases in
+# kinetic energy. The values are: Number of atoms that can be kicked
+#                                     (0 ==> No kicking)
+#                                 The energy of a kick (Ry)
+#                                 The number of time steps between kicks
+# MaxNSteps is the number of time steps to be used for MD, or the maximum number
+# of line minimizations to be used in static relaxation.
+#
+# MDTimeStep is the MD time step in femto seconds.
+#
+# AutoSave gives the number of time steps between subsequent saves of atomic
+# configurations. A value < 1 implies save only at the end of the simulation.
+################################################################################
+AtomTemperature
+300.0
+
+TemperatureTolerance
+0.1
+
+NoseHoover
+-1.0
+
+KickAtom
+0 0.05 200
+
+MaxNSteps
+1000
+
+MDTimeStep
+1.0
+
+AutoSave
+10
+
+################################################################################
+# ------- Parameters for defined motion simulations -------
+#
+# DefinedMotion corresponds to the displacement of one atom following a given
+# trajectory. The values are:
+# Index for the moving atom
+# Type of motion:
+#   0) constant velocity (a0/fs)
+#   1) oscillating
+# Type of evolution for the electrons:
+#   0) Adiabatic
+#   1) Non-adiabatic
+# Parameters for the motion in x, y and z.
+#   o For constant velocity: the component of the velocity.
+#   o For an oscillating atom: amplitude, angular frequency and phase
+################################################################################
+DefinedMotion
+1 0 0
+0.1 0.0 0.0
+
+################################################################################
+# ------- Parameters controlling I/O -------
+#
+# Verbosity determines the amount of output produced by the program.
+#
+# WriteBondData sets two flags and a distance related to bond data.
+#  flag 1: bond lengths (1 ==> write; 0 ==> do not write)
+#  flag 2: bond angles  (1 ==> write; 0 ==> do not write)
+#  distance: the cutoff radius used to distinguish between atoms that are or
+#            are not bonded to each other. 
+#
+# MovieRate is the number of MD time steps in between frames of the movie
+# dumped to the .xyz file. A value of 0 implies no frames are to be stored.
+#
+# VelocityRate is the number of MD time steps between dumps of atomic
+# velocities to the .vel file. A value of 0 implies no velocities are to be
+# stored.
+#
+# WavefunctionFlag determines whether the eigenvectors are to be written to a
+# file:
+#  0  ==>  Do not write out eigenvectors
+#  1  ==>  Write out eigenvectors
+#  2  ==>  Write out eigenvectors and the overlap matrix
+#          (required by plotdos)
+#
+# PartialPopulationFlag determines whether Mulliken population analysis is to
+# be applied to eigenstates with energies within a given window or not. This is
+# useful for determining the location in space of localised states.
+#  0  ==>  Do not evaluate partial populations
+#  n  ==>  Evaluate partial populations for |n| energy
+#          windows. This requires energy windows to be
+#          defined (ELo and EHi in eV). If n>0, the
+#          energies are defined relative to the vacuum.
+#          If n <0 the energies are defined relative to
+#          the Fermi level.
+#
+# HamiltonianFlag determines if the Hamiltonian (and overlap) matrix is to be
+# written out to file or not.
+#  0  ==> Do not write out Hamiltonian
+#  1  ==> Do write out Hamiltonian
+#
+# WriteEnergyFlag determines if a detailed breakdown of the energy is written
+# out or not.
+#  0  ==>  Do not write out breakdown
+#  1  ==>  Write out breakdown
+################################################################################
+Verbosity
+1
+
+WriteBondData
+0 0 6.0
+
+MovieRate
+0
+
+VelocityRate
+0
+
+WavefunctionFlag
+0
+
+PartialPopulationFlag
+0
+0.0 1.0
+
+WriteEnergyFlag
+0
+
+HamiltonianFlag
+0
+
+################################################################################
+# ------- Parameters that should seldom be changed -------
+#
+# BasisFlag determines whether or not auxiliary basis functions are used.
+#  0  ==>  Include all functions
+#  n  ==>  Ignore last n angular momentum states
+#
+# Seed is the seed for the random number generator
+#
+# OnSiteElectrostatics is set when the 1/r terms are to be neglected in
+# self-consistent tight binding, but the onsite Hubbard U is to be retained.
+# 0  ==>  Keep inter-site
+# 1  ==>  No inter-site
+################################################################################
+BasisFlag
+0
+
+Seed
+12345
+ 
+OnSiteElectrostatics 
+0
+
+################################################################################
+# ------- TB2 only -------
+#
+# XCfunctional defines the exchange and correlation functional used by TB2.
+# -1  ==>  No exchange and correlation (for debugging only)
+#  0  ==>  LDA
+#  1  ==>  PBE
+#
+# XCexpansion determines if a multisite expansion is to be ued by TB2.
+#  0  ==>  Keep exact functional
+#  1  ==>  Use a one site expansion
+#  2  ==>  Use a two site expansion
+#
+# McWedaXcFlag determines whether to use the McWeda method to calculate 
+# exchange-correlation. This is a tight-binding method with exact 2-body xc
+# (no exact crystal field terms) plus a correction for many body effects
+# (based on "effective densities"). see 10.1103/PhysRevB.71.235101
+#  0  ==> Do no use (Default)
+#  1  ==> Use tabulated 2-body exchange-correlation, without many-body corrections
+#         and no crystal field terms
+#  2  ==> Same as 1 except with the McWeda correction for hopping integrals (still
+#         no crystal field terms)
+#  3  ==> Same as two except use tabulated integrals for 2-body xtal field terms
+#         and no correction for MB xtal field terms. This should give same results
+#         as normal xchange-correlation for a dimer.
+#  4  ==> Exact 2-body hopping exchange-correlation, no exact xtal field exchange
+#         correlation. Many body corrections for both hopping and xtal field. This
+#         is the method in the above paper.
+#
+# IntegralMesh defines the density of points used for the mesh:
+#  Mesh type -- 0  ==>  Regular
+#               1  ==>  Atom centred
+# For a regular mesh, the type is followed by the mesh spacing (one number)
+# For an atom centred mesh, the type is followed by the number of points along
+# each dimension
+#  Number of radial points
+#  Number of points for theta
+#  Number of points for phi
+#
+# TestOverlap is set to 1 if the eigenvalues of the overlap matrix are to be
+# computed, otherwise it is set to zero.
+#
+# OrbitalStore determines how the atomic orbitals are stored. Keeping the
+# orbitals on the integral mesh is VERY memory intensive, but could save
+# some time when performing integrals.
+#  0  ==>  The orbitals are not stored, but evaluated as needed
+#  1  ==>  The orbitals are evaluated on the integral mesh and stored
+#
+# InverseSK determines if approximate 2 centre hopping integrals are computed
+# from the full Hamiltonian or not.
+#  0  ==>  Do not compute the two centre integrals
+#  1  ==>  Comoute the two centre integrals
+#
+# CalcScreenFunct determines whether a screening function is calculated for each
+# bond and written to the inverse SK files. (Does nothing if InverseSK=0)
+#  0  ==> Do not calculate a screening function (Default)
+#  1  ==> Wang 96 Screening function (https://doi.org/10.1103/PhysRevB.53.979)
+#         with all screnning parameters set to 1.0
+#  2  ==> Same as 1 except the tanh function is not applied (i.e. just eqn 3 in
+#         above paper)
+#  3  ==> Same as 2 except exp(-x) is replaced with exp(-(x^2)) [makes it shorter
+#         ranged)
+#  4  ==> \sum_{l}\frac{r_{ij}}{r_{il}+r_{jl}} exp( -d_{bc} ); d_{bc} is the 
+#         distance from the bond center (between atoms i and j) and the neighbor
+#         (index l)
+#  5  ==> Wang 96 Parameterised, same as 1 except \beta_1, \beta_2 and \beta_3 
+#         (see paper above) are set with the ScreenFunctParams keyword
+#
+#  ScreenFunctParams lets usr define parameters in some of the screening functions
+#  (only flag=5 at time of writing). Number of parameters depends on the screen funct
+#  used. Format is
+#  <nParams> <param1> <param2>....
+#
+# screenfunctdampening determines the dampening function to apply to 
+# "CalcScreenFunct" values. Consists of two values, first determines the type of
+# function and the second is a parameter for that function (see below).
+# Only has an effect if InverseSK>0 and CalcScreenFunct>0. Note below formulae
+# are for a bond A-B with neighbours N, R_{x} refers to atomic radii, r_{xy}
+# refer to distances between atoms
+#  0  ==> Do not apply a dampening function (Default)
+#  1  p ==> Apply dampening function of the form (smaller p=sharper cutoff)
+#f_D = [sqrt((1 - \frac{r_{AN}}{R_{A}+R_{N}}) (1- \frac{r_{BN}}{R_{B}+R_{N}}) )]^p
+#  2  p ==> Apply dampening function of the form (larger p=sharper cutoff)
+#f_D = tanh(p[(\frac{R_{A}+R_{N}}{r_{AN}})  (\frac{R_{B}+R_{N}}{r_{BN}})]^{0.5})
+#
+# ScreenFunctAngDep determines how to treat the angular dependence of the
+# calculated screening function. 
+#  0  ==> No explicit Angular dependence (1 screen-funct value per bond)
+#  1  ==> scale the screen function for bond I-J by 
+#         0.5*f(\theta_{IJK}) + f(\theta_{JIK}). Multiple screening functions
+#         then exist for each bond (f depends on the angular momenta of orbitals
+#         forming the bond)  
+#
+# DiameterNLV is the diameter of the non-local pseudopotentials
+#
+# e0Method
+# 0  ==> Calculate E0 exactly using numerical integration (Default)
+# 1  ==> Calculate E0 using a pair potential
+#
+################################################################################
+XCfunctional
+0
+
+XCexpansion
+0
+
+McWedaXcFlag
+0
+
+IntegralMesh
+1
+50 50 50
+
+TestOverlap
+0
+
+OrbitalStore
+0
+
+InverseSK
+0
+
+CalcScreenFunct
+0
+
+ScreenFunctDampening
+0
+
+ScreenFunctParams
+3 1.0 1.0 1.0
+
+ScreenFunctAngDep
+0
+
+DiameterNLV
+0.0
+
+e0Method
+0
+
