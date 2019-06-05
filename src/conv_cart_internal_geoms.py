@@ -3,6 +3,9 @@
 import itertools as it
 import math
 
+class NotATriangleError(ValueError):
+	pass
+
 
 class TrimerGeom():
 	def __init__(self, elements:"list of 3 str", internCoords:"TrimerInternGeom object"):
@@ -30,7 +33,7 @@ class TrimerInternGeom():
 			self.cartCoords[idx] = [x-tVect for x,tVect in it.zip_longest(atom,atomATransVector)]
 
 	@classmethod
-	def fromSankeyRep(self, dAB, dC, theta:"In degrees"):
+	def fromSankeyRep(self, dAB, dC, theta:"In degrees, A-C-K"):
 		''' Get Geometry from bondlength (dAB), distance of neighbour from bond center and angle between bond center and neighbour '''
 		atomAPos = [0,0,0]
 		atomBPos = [0,0,dAB]
@@ -71,7 +74,7 @@ class TrimerInternGeom():
 				elif abs(factor + 1.0) < floatTol: #-1.0000x domain error
 					currAngle = math.acos(-1.0)
 				else:
-					raise ValueError("Lengths of {},{},{} do not lead to a triangle".format(dAB,dBC,dCA)) from e
+					raise NotATriangleError("Lengths of {},{},{} do not lead to a triangle".format(dAB,dBC,dCA)) from e
 
 		#Now use the first angle and dCA to get the final position
 		cosFactorABC = allCosFactors[0]	
